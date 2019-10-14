@@ -8,11 +8,12 @@ name: Build
 
 jobs:
   build:
-    name: Build
+    name: Kernel
     runs-on: ubuntu-latest
     strategy:
       matrix:
         repo: ["microsoft/WSL2-Linux-Kernel","torvalds/linux"]
+      fail-fast: false
     steps:
     - uses: actions/checkout@master
       with:
@@ -23,6 +24,12 @@ jobs:
       id: build
       run: |
         set -x
+        pwd
+
+        if [ -d $PWD/../linux ];then
+          cp -a ../linux/* .
+        fi
+
         sudo apt update
         sudo apt install -y build-essential flex bison libssl-dev libelf-dev rsync
 
@@ -76,3 +83,7 @@ jobs:
       with:
         name: wsl2-kernel-${{ steps.build.outputs.kernelversion }}
         path: wsl2_dist
+    - uses: actions/upload-artifact@master
+      with:
+        name: wsl2-kernel-${{ steps.build.outputs.kernelversion }}-modules.builtin
+        path: linux/lib/modules/${{ steps.build.outputs.kernelversion }}/modules.builtin
