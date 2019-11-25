@@ -47,6 +47,7 @@ jobs:
         CONFIG_ISCSI_TCP=y
         CONFIG_ISCSI_BOOT_SYSFS=y
         CONFIG_ISCSI_TARGET=y
+        CONFIG_TARGET_CORE=y
         " >> Microsoft/config-wsl
 
         make KCONFIG_CONFIG=Microsoft/config-wsl -j $(nproc)
