@@ -41,6 +41,7 @@ jobs:
         echo "
         CONFIG_NFS_V4_1=y
         CONFIG_NFS_V4_2=y
+        CONFIG_ACPI_CONFIGFS=y
         " >> Microsoft/config-wsl
 
         make KCONFIG_CONFIG=Microsoft/config-wsl -j $(nproc)
