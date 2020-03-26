@@ -59,14 +59,14 @@ jobs:
         CONFIG_TARGET_CORE=y
         " >> Microsoft/config-wsl
 
-        make KCONFIG_CONFIG=Microsoft/config-wsl -j $(nproc)
+        make LOCALVERSION="" KCONFIG_CONFIG=Microsoft/config-wsl -j $(nproc)
 
-        make INSTALL_MOD_PATH=linux modules_install
-        make INSTALL_HDR_PATH=linux/usr headers_install
+        make LOCALVERSION="" INSTALL_MOD_PATH=linux modules_install
+        make LOCALVERSION="" INSTALL_HDR_PATH=linux/usr headers_install
 
         ls -lah arch/x86/boot/bzImage
 
-        kernelversion=$(make -s kernelversion)-microsoft-standard+
+        kernelversion=$(make -s kernelversion)-microsoft-standard
         kernelversion=`ls linux/lib/modules`
         echo ::set-output name=kernelversion::`echo $kernelversion`
 

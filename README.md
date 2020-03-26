@@ -8,11 +8,11 @@
 
 * https://github.com/khs1994-docker/lnmp/blob/19.03/kubernetes/wsl2/README.KERNEL.md
 
-## deb
+## .deb
 
-* `/lib/modules/${uname -r}`
+* `/lib/modules/$(uname -r)`
 * `/usr/include`
-* `/usr/src/linux-headers-${uname -r}`
+* `/usr/src/linux-headers-$(uname -r)`
 
 ## .img
 
@@ -20,7 +20,7 @@
 
 ## modules.builtin
 
-* `/lib/modules/${uname -r}/modules.builtin`
+* `/lib/modules/$(uname -r)/modules.builtin`
 
 ## 新增模块
 
