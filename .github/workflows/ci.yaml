@@ -111,8 +111,18 @@ jobs:
         mkdir wsl2_dist
         cp arch/x86/boot/bzImage wsl2_dist/wsl2Kernel
         cp linux.tar.gz wsl2_dist
+
+        cp arch/x86/boot/bzImage  $kernelversion.img
+        cp linux.tar.gz           linux-headers-${kernelversion}.tar.gz
+        cp linux/lib/modules/$kernelversion/modules.builtin \
+                                  $kernelversion-modules.builtin
     - uses: actions/upload-artifact@master
       name: Upload Kernel
+      with:
+        name: wsl2-kernel-${{ steps.build.outputs.kernelversion }}-img
+        path: wsl2_dist/wsl2Kernel
+    - uses: actions/upload-artifact@master
+      name: Upload Kernel and headers
       with:
         name: wsl2-kernel-${{ steps.build.outputs.kernelversion }}
         path: wsl2_dist
@@ -139,7 +149,7 @@ jobs:
         sed "s/KERNEL_VERSION/${kernelversion}/g" deb/DEBIAN/control \
             > linux-headers-${kernelversion}/DEBIAN/control
 
-        DEB_VERSION=echo ${kernelversion} | cut -d '-' -f 1
+        DEB_VERSION=`echo ${kernelversion} | cut -d '-' -f 1`
         sed -i "s/DEB_VERSION/${DEB_VERSION}/g" \
             linux-headers-${kernelversion}/DEBIAN/control
 
@@ -157,3 +167,12 @@ jobs:
       with:
         name: ${{ steps.deb.outputs.DEB_NAME }}
         path: ${{ steps.deb.outputs.DEB_NAME }}
+    - uses: docker://pcit/github-release
+      with:
+        token: ${GITHUB_TOKEN}
+        repo: khs1994/WSL2-Linux-Kernel
+        # headers deb,kernel.img,headers .tar.gz,modules.builtin
+        files: ${{ steps.deb.outputs.DEB_NAME }},kernel-${{ steps.build.outputs.kernelversion }}.img,linux-headers-${{ steps.build.outputs.kernelversion }}.tar.gz,${{ steps.build.outputs.kernelversion }}-modules.builtin
+        target_commitish: refs/tags/nightly
+        note: nightly
+        title: nightly
