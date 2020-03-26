@@ -160,7 +160,11 @@ jobs:
 
         sudo cp -a linux/. linux-headers-${kernelversion}
         ls -la linux-headers-${kernelversion}
+        cd linux-headers-${kernelversion}/usr
+        tar -zcvf ${kernelversion}-include.tar.gz include
+        rm -rf include
 
+        cd ../../
         DEB_NAME=linux-headers-${kernelversion}_${DEB_VERSION}-1_amd64.deb
         sudo dpkg-deb -b linux-headers-${kernelversion} $DEB_NAME
 
@@ -180,4 +184,4 @@ jobs:
         note: ${{ steps.build.outputs.kernelversion_trim_plus }}
         title: ${{ steps.build.outputs.kernelversion_trim_plus }}
         checksum: sha256
-      continue-on-error: true
+        draft: true
