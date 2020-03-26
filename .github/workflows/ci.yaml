@@ -161,8 +161,8 @@ jobs:
         sudo cp -a linux/. linux-headers-${kernelversion}
         ls -la linux-headers-${kernelversion}
         cd linux-headers-${kernelversion}/usr
-        tar -zcvf ${kernelversion}-include.tar.gz include
-        rm -rf include
+        sudo tar -zcvf ${kernelversion}-include.tar.gz include
+        sudo rm -rf include
 
         cd ../../
         DEB_NAME=linux-headers-${kernelversion}_${DEB_VERSION}-1_amd64.deb
