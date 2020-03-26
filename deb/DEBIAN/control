@@ -5,7 +5,6 @@ Section: kernel
 Source: linux
 Architecture: amd64
 Maintainer: khs1994-docker/lnmp <docker@khs1994.com>
-Installed-Size: 4297 kB
 Homepage: https://www.kernel.org/
 Description: Header files for Linux KERNEL_VERSION
  This package provides the architecture-specific kernel header files for

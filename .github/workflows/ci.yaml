@@ -130,16 +130,16 @@ jobs:
 
         mkdir -p linux-headers-${kernelversion}/DEBIAN
 
-        sed "/KERNEL_VERSION/${kernelversion}/" deb/DEBIAN/control \
+        sed "s/KERNEL_VERSION/${kernelversion}/g" deb/DEBIAN/control \
             > linux-headers-${kernelversion}/DEBIAN/control
 
         DEB_VERSION=echo ${kernelversion} | cut -d '-' -f 1
-        sed -i "/DEB_VERSION/${DEB_VERSION}/" \
+        sed -i "s/DEB_VERSION/${DEB_VERSION}/g" \
             linux-headers-${kernelversion}/DEBIAN/control
 
         cat linux-headers-${kernelversion}/DEBIAN/control
 
-        sudo cp -a linux/. linux-headers-${kernelversion}/data
+        sudo cp -a linux/. linux-headers-${kernelversion}
         ls -la linux-headers-${kernelversion}/data
 
         DEB_NAME=linux-headers-${kernelversion}_${DEB_VERSION}-1_amd64.deb
