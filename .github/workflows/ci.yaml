@@ -176,7 +176,7 @@ jobs:
         path: ${{ steps.deb.outputs.DEB_NAME }}
     - uses: docker://pcit/github-release
       with:
-        token: ${GITHUB_TOKEN}
+        token: ${{ secrets.GITHUB_TOKEN }}
         repo: khs1994/WSL2-Linux-Kernel
         # headers deb,kernel.img,headers .tar.gz,modules.builtin
         files: ${{ steps.deb.outputs.DEB_NAME }},kernel-${{ steps.build.outputs.kernelversion_trim_plus }}.img,linux-headers-${{ steps.build.outputs.kernelversion_trim_plus }}.tar.gz,${{ steps.build.outputs.kernelversion_trim_plus }}-modules.builtin
