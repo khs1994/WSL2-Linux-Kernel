@@ -2,7 +2,7 @@ on:
   push:
   pull_request:
   schedule:
-    - cron: '0 0 * * */1'
+    - cron: '0 0 * * 4'
 
 name: Build
 
@@ -25,6 +25,8 @@ jobs:
         repository: ${{ matrix.repo }}
         ref: ${{ matrix.ref }}
     - name: Build
+      env:
+        ref: ${{ matrix.ref }}
       id: build
       run: |
         set -x
@@ -39,7 +41,7 @@ jobs:
 
         if ! [ -f Microsoft/config-wsl ];then
           mkdir Microsoft/
-          curl -fsSL -o Microsoft/config-wsl https://raw.githubusercontent.com/microsoft/WSL2-Linux-Kernel/master/Microsoft/config-wsl
+          curl -fsSL -o Microsoft/config-wsl https://raw.githubusercontent.com/microsoft/WSL2-Linux-Kernel/${ref}/Microsoft/config-wsl
         fi
 
         echo "
