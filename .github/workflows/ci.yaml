@@ -128,7 +128,13 @@ jobs:
       run: |
         set -x
 
+        pwd
+
+        ls -la
+
         mkdir -p linux-headers-${kernelversion}/DEBIAN
+        mkdir -p deb/DEBIAN
+        curl -L -o deb/DEBIAN/control https://raw.githubusercontent.com/khs1994/WSL2-Linux-Kernel/master/deb/DEBIAN/control
 
         sed "s/KERNEL_VERSION/${kernelversion}/g" deb/DEBIAN/control \
             > linux-headers-${kernelversion}/DEBIAN/control
@@ -140,7 +146,7 @@ jobs:
         cat linux-headers-${kernelversion}/DEBIAN/control
 
         sudo cp -a linux/. linux-headers-${kernelversion}
-        ls -la linux-headers-${kernelversion}/data
+        ls -la linux-headers-${kernelversion}
 
         DEB_NAME=linux-headers-${kernelversion}_${DEB_VERSION}-1_amd64.deb
         sudo dpkg-deb -b linux-headers-${kernelversion} $DEB_NAME
