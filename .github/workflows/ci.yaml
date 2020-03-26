@@ -24,7 +24,7 @@ jobs:
         fetch-depth: 1
         repository: ${{ matrix.repo }}
         ref: ${{ matrix.ref }}
-    - name: Build
+    - name: Build Kernel
       env:
         ref: ${{ matrix.ref }}
       id: build
@@ -121,3 +121,33 @@ jobs:
       with:
         name: wsl2-kernel-${{ steps.build.outputs.kernelversion }}-modules.builtin
         path: linux/lib/modules/${{ steps.build.outputs.kernelversion }}/modules.builtin
+    - name: Build deb
+      id: deb
+      env:
+        kernelversion: ${{ steps.build.outputs.kernelversion }}
+      run: |
+        set -x
+
+        mkdir -p linux-headers-${kernelversion}/DEBIAN
+
+        sed "/KERNEL_VERSION/${kernelversion}/" deb/DEBIAN/control \
+            > linux-headers-${kernelversion}/DEBIAN/control
+
+        DEB_VERSION=echo ${kernelversion} | cut -d '-' -f 1
+        sed -i "/DEB_VERSION/${DEB_VERSION}/" \
+            linux-headers-${kernelversion}/DEBIAN/control
+
+        cat linux-headers-${kernelversion}/DEBIAN/control
+
+        sudo cp -a linux/. linux-headers-${kernelversion}/data
+        ls -la linux-headers-${kernelversion}/data
+
+        DEB_NAME=linux-headers-${kernelversion}_${DEB_VERSION}-1_amd64.deb
+        sudo dpkg-deb -b linux-headers-${kernelversion} $DEB_NAME
+
+        echo ::set-output name=DEB_NAME::${DEB_NAME}
+    - uses: actions/upload-artifact@master
+      name: Upload deb
+      with:
+        name: ${{ steps.deb.outputs.DEB_NAME }}
+        path: ${{ steps.deb.outputs.DEB_NAME }}
