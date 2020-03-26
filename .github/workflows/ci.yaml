@@ -70,9 +70,12 @@ jobs:
         kernelversion=`ls linux/lib/modules`
         echo ::set-output name=kernelversion::`echo $kernelversion`
 
+        kernelversion_trim_plus=`echo ${kernelversion} | cut -d + -f 1`
+        echo ::set-output name=kernelversion_trim_plus::${kernelversion_trim_plus}
     - name: Dist
       env:
         kernelversion: ${{ steps.build.outputs.kernelversion }}
+        kernelversion_trim_plus: ${{ steps.build.outputs.kernelversion_trim_plus }}
       run: |
         mv Microsoft/config-wsl .config
 
@@ -112,15 +115,15 @@ jobs:
         cp arch/x86/boot/bzImage wsl2_dist/wsl2Kernel
         cp linux.tar.gz wsl2_dist
 
-        cp arch/x86/boot/bzImage  $kernelversion.img
-        cp linux.tar.gz           linux-headers-${kernelversion}.tar.gz
+        cp arch/x86/boot/bzImage  kernel-${kernelversion_trim_plus}.img
+        cp linux.tar.gz           linux-headers-${kernelversion_trim_plus}.tar.gz
         cp linux/lib/modules/$kernelversion/modules.builtin \
-                                  $kernelversion-modules.builtin
+                                  ${kernelversion_trim_plus}-modules.builtin
     - uses: actions/upload-artifact@master
       name: Upload Kernel
       with:
-        name: wsl2-kernel-${{ steps.build.outputs.kernelversion }}-img
-        path: wsl2_dist/wsl2Kernel
+        name: wsl2-kernel-${{ steps.build.outputs.kernelversion }}.img
+        path: kernel-${{ steps.build.outputs.kernelversion_trim_plus }}.img
     - uses: actions/upload-artifact@master
       name: Upload Kernel and headers
       with:
@@ -172,7 +175,9 @@ jobs:
         token: ${GITHUB_TOKEN}
         repo: khs1994/WSL2-Linux-Kernel
         # headers deb,kernel.img,headers .tar.gz,modules.builtin
-        files: ${{ steps.deb.outputs.DEB_NAME }},kernel-${{ steps.build.outputs.kernelversion }}.img,linux-headers-${{ steps.build.outputs.kernelversion }}.tar.gz,${{ steps.build.outputs.kernelversion }}-modules.builtin
-        target_commitish: refs/tags/nightly
-        note: nightly
-        title: nightly
+        files: ${{ steps.deb.outputs.DEB_NAME }},kernel-${{ steps.build.outputs.kernelversion_trim_plus }}.img,linux-headers-${{ steps.build.outputs.kernelversion_trim_plus }}.tar.gz,${{ steps.build.outputs.kernelversion_trim_plus }}-modules.builtin
+        target_commitish: refs/tags/${{ steps.build.outputs.kernelversion_trim_plus }}
+        note: ${{ steps.build.outputs.kernelversion_trim_plus }}
+        title: ${{ steps.build.outputs.kernelversion_trim_plus }}
+        checksum: sha256
+      continue-on-error: true
