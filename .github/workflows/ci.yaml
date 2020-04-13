@@ -12,11 +12,15 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        repo: ["microsoft/WSL2-Linux-Kernel","torvalds/linux"]
-        ref: ["master","linux-msft-wsl-4.19.y"]
-        exclude:
-          - repo: torvalds/linux
+        repo: ["microsoft/WSL2-Linux-Kernel","torvalds/linux","nathanchance/WSL2-Linux-Kernel"]
+        ref: ["master","linux-msft-wsl-4.19.y","next"]
+        include:
+          - repo: microsoft/WSL2-Linux-Kernel
             ref: linux-msft-wsl-4.19.y
+          - repo: microsoft/WSL2-Linux-Kernel
+            ref: master
+          - repo: nathanchance/WSL2-Linux-Kernel
+            ref: next
       fail-fast: false
     steps:
     - uses: actions/checkout@master
@@ -181,3 +185,4 @@ jobs:
         title: ${{ steps.build.outputs.kernelversion }}
         checksum: sha256
         draft: true
+        overwrite: true
