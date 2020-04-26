@@ -1,5 +1,54 @@
+diff --git a/arch/x86/include/asm/hyperv-tlfs.h b/arch/x86/include/asm/hyperv-tlfs.h
+index 29336574d..598d4a7f2 100644
+--- a/arch/x86/include/asm/hyperv-tlfs.h
++++ b/arch/x86/include/asm/hyperv-tlfs.h
+@@ -380,6 +380,9 @@ struct hv_tsc_emulation_status {
+ #define HVCALL_FLUSH_GUEST_PHYSICAL_ADDRESS_SPACE 0x00af
+ #define HVCALL_FLUSH_GUEST_PHYSICAL_ADDRESS_LIST 0x00b0
+ 
++#define HVCALL_QUERY_CAPABILITIES		0x8001
++#define HVCALL_MEMORY_HEAT_HINT			0x8003
++
+ #define HV_X64_MSR_VP_ASSIST_PAGE_ENABLE	0x00000001
+ #define HV_X64_MSR_VP_ASSIST_PAGE_ADDRESS_SHIFT	12
+ #define HV_X64_MSR_VP_ASSIST_PAGE_ADDRESS_MASK	\
+@@ -877,6 +880,12 @@ union hv_gpa_page_range {
+ 		u64 largepage:1;
+ 		u64 basepfn:52;
+ 	} page;
++	struct {
++		u64:12;
++		u64 page_size:1;
++		u64 reserved:8;
++		u64 base_large_pfn:43;
++	};
+ };
+ 
+ /*
+@@ -950,4 +959,21 @@ struct hv_retarget_device_interrupt {
+ 	u64 reserved2;
+ 	struct hv_device_interrupt_target int_target;
+ } __packed __aligned(8);
++
++#ifdef CONFIG_PAGE_REPORTING
++#define HV_CAPABILITY_MEMORY_COLD_DISCARD_HINT	BIT(8)
++
++// The whole argument should fit in a page to be able to pass to the hypervisor
++// in one hypercall.
++#define HV_MAX_GPA_PAGE_RANGES ((PAGE_SIZE - 8)/sizeof(union hv_gpa_page_range))
++
++/* HvExtMemoryHeatHint hypercall */
++#define HV_MEMORY_HINT_TYPE_COLD_DISCARD	BIT(1)
++struct hv_memory_hint {
++	u64 type:2;
++	u64 reserved:62;
++	union hv_gpa_page_range ranges[1];
++};
++
++#endif //CONFIG_PAGE_REPORTING
+ #endif
 diff --git a/drivers/hv/Kconfig b/drivers/hv/Kconfig
-index 79e5356a737a..66c794d92391 100644
+index 79e5356a7..66c794d92 100644
 --- a/drivers/hv/Kconfig
 +++ b/drivers/hv/Kconfig
 @@ -23,6 +23,7 @@ config HYPERV_UTILS
@@ -9,9 +58,9 @@ index 79e5356a737a..66c794d92391 100644
 +	select PAGE_REPORTING
  	help
  	  Select this option to enable Hyper-V Balloon driver.
-
+ 
 diff --git a/drivers/hv/hv_balloon.c b/drivers/hv/hv_balloon.c
-index 32e3bc0aa665..59c36292e034 100644
+index 32e3bc0aa..59c36292e 100644
 --- a/drivers/hv/hv_balloon.c
 +++ b/drivers/hv/hv_balloon.c
 @@ -21,12 +21,14 @@
@@ -22,14 +71,14 @@ index 32e3bc0aa665..59c36292e034 100644
 +#include <linux/page_reporting.h>
  #include <linux/hyperv.h>
  #include <asm/hyperv-tlfs.h>
-
+ 
  #include <asm/mshyperv.h>
-
+ 
 +#include <asm/mshyperv.h>
 +
  #define CREATE_TRACE_POINTS
  #include "hv_trace_balloon.h"
-
+ 
 @@ -563,6 +565,10 @@ struct hv_dynmem_device {
  	 * The negotiated version agreed by host.
  	 */
@@ -39,12 +88,12 @@ index 32e3bc0aa665..59c36292e034 100644
 +	struct page_reporting_dev_info ph_dev_info;
 +#endif
  };
-
+ 
  static struct hv_dynmem_device dm_device;
 @@ -1565,6 +1571,93 @@ static void balloon_onchannelcallback(void *context)
-
+ 
  }
-
+ 
 +#ifdef CONFIG_PAGE_REPORTING
 +static u64 hyperv_query_ext_cap(void)
 +{
@@ -138,19 +187,19 @@ index 32e3bc0aa665..59c36292e034 100644
 @@ -1719,6 +1812,11 @@ static int balloon_probe(struct hv_device *dev,
  		goto probe_error;
  	}
-
+ 
 +#ifdef CONFIG_PAGE_REPORTING
 +	if (enable_hinting() < 0)
 +		goto probe_error;
 +#endif
 +
  	return 0;
-
+ 
  probe_error:
 @@ -1745,6 +1843,10 @@ static int balloon_remove(struct hv_device *dev)
  	cancel_work_sync(&dm->balloon_wrk.wrk);
  	cancel_work_sync(&dm->ha_wrk.wrk);
-
+ 
 +#ifdef CONFIG_PAGE_REPORTING
 +	disable_hinting();
 +#endif
@@ -158,52 +207,3 @@ index 32e3bc0aa665..59c36292e034 100644
  	kthread_stop(dm->thread);
  	vmbus_close(dev->channel);
  #ifdef CONFIG_MEMORY_HOTPLUG
-diff --git a/include/asm-generic/hyperv-tlfs.h b/include/asm-generic/hyperv-tlfs.h
-index 262fae9526b1..f2e20a442de0 100644
---- a/include/asm-generic/hyperv-tlfs.h
-+++ b/include/asm-generic/hyperv-tlfs.h
-@@ -148,6 +148,8 @@ struct ms_hyperv_tsc_page {
- #define HVCALL_RETARGET_INTERRUPT		0x007e
- #define HVCALL_FLUSH_GUEST_PHYSICAL_ADDRESS_SPACE 0x00af
- #define HVCALL_FLUSH_GUEST_PHYSICAL_ADDRESS_LIST 0x00b0
-+#define HVCALL_QUERY_CAPABILITIES		0x8001
-+#define HVCALL_MEMORY_HEAT_HINT			0x8003
-
- #define HV_FLUSH_ALL_PROCESSORS			BIT(0)
- #define HV_FLUSH_ALL_VIRTUAL_ADDRESS_SPACES	BIT(1)
-@@ -371,6 +373,12 @@ union hv_gpa_page_range {
- 		u64 largepage:1;
- 		u64 basepfn:52;
- 	} page;
-+	struct {
-+		u64:12;
-+		u64 page_size:1;
-+		u64 reserved:8;
-+		u64 base_large_pfn:43;
-+	};
- };
-
- /*
-@@ -490,4 +498,22 @@ struct hv_set_vp_registers_input {
- 	} element[];
- } __packed;
-
-+#ifdef CONFIG_PAGE_REPORTING
-+#define HV_CAPABILITY_MEMORY_COLD_DISCARD_HINT	BIT(8)
-+
-+/*
-+ * The whole argument should fit in a page to be able to pass to the hypervisor
-+ * in one hypercall.
-+ */
-+#define HV_MAX_GPA_PAGE_RANGES ((PAGE_SIZE - 8)/sizeof(union hv_gpa_page_range))
-+
-+/* HvExtMemoryHeatHint hypercall */
-+#define HV_MEMORY_HINT_TYPE_COLD_DISCARD	BIT(1)
-+struct hv_memory_hint {
-+	u64 type:2;
-+	u64 reserved:62;
-+	union hv_gpa_page_range ranges[1];
-+};
-+
-+#endif
- #endif
