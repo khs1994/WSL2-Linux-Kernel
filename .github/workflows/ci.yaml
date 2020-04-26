@@ -47,9 +47,9 @@ jobs:
             || curl -fsSL -o Microsoft/config-wsl https://raw.githubusercontent.com/microsoft/WSL2-Linux-Kernel/linux-msft-wsl-4.19.y/Microsoft/config-wsl
 
           curl -fsSL -O \
-          https://raw.githubusercontent.com/khs1994/WSL2-Linux-Kernel/master/1.diff
+          https://raw.githubusercontent.com/khs1994/WSL2-Linux-Kernel/master/memory-reclaim.diff
 
-          patch -p1 < 1.diff
+          patch -p1 < memory-reclaim.diff
         fi
 
         echo "
