@@ -105,6 +105,11 @@ jobs:
         CONFIG_NET_SCH_SFQ=y
         CONFIG_NET_ACT_POLICE=y
         CONFIG_NET_ACT_GACT=y
+
+        CONFIG_CRYPTO_USER=y
+        CONFIG_CRYPTO_USER_API_RNG=y
+        CONFIG_CRYPTO_USER_API_HASH=y
+        CONFIG_CRYPTO_USER_API_AEAD=y
         " >> Microsoft/config-wsl
 
         # sudo sed -i "s/microsoft-standard/microsoft-WSL2-standard/g" Microsoft/config-wsl
