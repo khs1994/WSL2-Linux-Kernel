@@ -9,7 +9,7 @@ name: Build
 jobs:
   build:
     name: Kernel
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         repo: ["microsoft/WSL2-Linux-Kernel","torvalds/linux"]
