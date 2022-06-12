@@ -76,6 +76,8 @@ jobs:
         # CNI Calico eBPF
         CONFIG_BPFILTER=y
         CONFIG_NETFILTER_XT_MATCH_BPF=y
+        CONFIG_NETFILTER_XT_MATCH_U32=y
+        CONFIG_NET_EMATCH_IPSET=y
         # CONFIG_NET_CLS_BPF=y
         # CONFIG_NET_ACT_BPF=y
         # CONFIG_BPF_JIT=y
