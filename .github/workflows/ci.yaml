@@ -156,7 +156,7 @@ jobs:
 
         cd linux
         sudo chown -R root:root .
-        sudo tar -zcvf ../linux.tar.gz .
+        sudo tar -zcf ../linux.tar.gz .
         cd ..
         mkdir wsl2_dist
         cp arch/x86/boot/bzImage wsl2_dist/wsl2Kernel
