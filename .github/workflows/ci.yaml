@@ -110,10 +110,10 @@ jobs:
 
         # sudo sed -i "s/microsoft-standard/microsoft-WSL2-standard/g" Microsoft/config-wsl
 
-        make LOCALVERSION="" KCONFIG_CONFIG=Microsoft/config-wsl -j $(nproc)
+        make LOCALVERSION="" KCONFIG_CONFIG=Microsoft/config-wsl -j $(nproc) > /dev/null
 
-        make LOCALVERSION="" INSTALL_MOD_PATH=linux modules_install
-        make LOCALVERSION="" INSTALL_HDR_PATH=linux/usr headers_install
+        make LOCALVERSION="" INSTALL_MOD_PATH=linux modules_install > /dev/null
+        make LOCALVERSION="" INSTALL_HDR_PATH=linux/usr headers_install > /dev/null
 
         ls -lah arch/x86/boot/bzImage
 
