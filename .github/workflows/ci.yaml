@@ -35,6 +35,8 @@ jobs:
         fetch-depth: 1
         repository: ${{ matrix.repo }}
         ref: ${{ matrix.ref }}
+    - name: Free Disk Space (Ubuntu)
+      uses: jlumbroso/free-disk-space@main
     - name: Build Kernel
       env:
         ref: ${{ matrix.ref }}
