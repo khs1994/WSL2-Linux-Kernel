@@ -151,7 +151,7 @@ jobs:
         ls -la linux/lib/modules/$kernelversion
 
         ln -snf /usr/src/linux-headers-$kernelversion linux/lib/modules/$kernelversion/build
-        unlink linux/lib/modules/$kernelversion/source
+        unlink linux/lib/modules/$kernelversion/source || true
         rsync -a --files-from=../hdr_files ./ linux/usr/src/$hdr_dir
 
         cd linux
