@@ -172,7 +172,7 @@ jobs:
         cp linux/lib/modules/$kernelversion/modules.builtin \
                                   ${kernelversion}-modules.builtin
         sudo ./Microsoft/scripts/gen_modules_vhdx.sh "$PWD/linux" \
-           $(make -s kernelrelease) ${kernelversion}-modules.vhdx
+           ${kernelversion} ${kernelversion}-modules.vhdx
     - uses: actions/upload-artifact@main
       name: Upload Kernel
       with:
