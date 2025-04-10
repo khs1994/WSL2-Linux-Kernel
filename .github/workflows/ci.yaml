@@ -37,6 +37,8 @@ jobs:
         ref: ${{ matrix.ref }}
     - name: Free Disk Space (Ubuntu)
       uses: jlumbroso/free-disk-space@main
+      with:
+        tool-cache: false
     - name: Build Kernel
       env:
         ref: ${{ matrix.ref }}
