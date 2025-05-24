@@ -37,9 +37,6 @@ jobs:
         ref: ${{ matrix.ref }}
     - name: Free Disk Space (Ubuntu)
       uses: jlumbroso/free-disk-space@main
-      with:
-        tool-cache: false
-        large-packages: false
     - name: Build Kernel
       env:
         ref: ${{ matrix.ref }}
@@ -52,7 +49,7 @@ jobs:
         fi
 
         sudo apt update
-        sudo apt install -y build-essential flex bison libssl-dev libelf-dev rsync dwarves qemu-utils
+        sudo apt install -y build-essential flex bison libssl-dev libelf-dev rsync dwarves
 
         mkdir -p Microsoft/
 
@@ -172,7 +169,7 @@ jobs:
         cp linux/lib/modules/$kernelversion/modules.builtin \
                                   ${kernelversion}-modules.builtin
         sudo ./Microsoft/scripts/gen_modules_vhdx.sh "$PWD/linux" \
-           ${kernelversion} ${kernelversion}-modules.vhdx
+           $(make -s kernelrelease) ${kernelversion}-modules.vhdx
     - uses: actions/upload-artifact@main
       name: Upload Kernel
       with:
